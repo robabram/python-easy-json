@@ -17,23 +17,17 @@ The python-json-object can be used to:
 Get It Now
 ==========
 
-::
-
-    $ pip install -U python-json-object
+    Too many like named projects on PyPi.  Need to find a new package name.
 
 Why a JSON Object library?
 ==========================
 After years of python development, I grew tired of receiving data from APIs, database, csv files and so on and working with them as python dictionaries. IE: 
-
-::
 
     for row in results:
         if row['the_key'][0]['another_key'] == 'the_value':
             ...
 
 With JSONObject this may be re-written as:
-
-::
 
     from json_object import JSONObject
 
@@ -49,27 +43,21 @@ Simple Examples
 
 Data from a JSON String
 
-::
-
     from json_object import JSONObject
     
     # JSON string
     obj = JSONObject('{"test_key": "test_value"}')
-    print(obj.to_json(indent=2))
+    print(obj.to_json())
 
     $ {"test_key": "test_value"}
 
 Data from a python dictionary
-
-::
 
     # Python dictionary 
     obj = JSONObject({'test_key': 'test_value'})
     print(obj.to_json())
 
     $ {"test_key": "test_value"}
-
-
 
 
 Data Models For Anything
