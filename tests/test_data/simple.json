@@ -1,0 +1,8 @@
+{
+  "field_bool": "true",
+  "field_int": 123,
+  "field_float": 456.789,
+  "field_str": "this is a string",
+  "field_date": "2022-09-09",
+  "field_datetime": "2022-09-19 10:11:01.123456"
+}
