@@ -69,8 +69,6 @@ As a bonus, IDEs with auto-completion and support python type hinting will auto-
 
 This example shows how to define nested/child data models, including lists of data models.
 
-::
-
     # Represents json from 'tests/test_data/nested_data_1.json'
     class CakeToppingTypeModel(JSONObject):
         id: int = None
@@ -101,8 +99,6 @@ Automatically Convert JSON Values
 =================================
 If a model has been defined and the properties have python type hint annotations, the JSONObject can convert values to the annotation type.
 
-::
-
     from datetime import datetime 
 
     class TimestampModel(JSONObject):
@@ -118,8 +114,6 @@ If a model has been defined and the properties have python type hint annotations
     $ ID: 123: Sep 19, 2022 @ 10:11:01 AM
 
     
-
-
 Project Links
 =============
 
