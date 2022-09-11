@@ -5,7 +5,7 @@
 import json
 
 from tests.base_test import BaseTestCase
-from json_object import JSONObject
+from python_easy_json import JSONObject
 
 
 class TestDataExport(BaseTestCase):

@@ -9,7 +9,7 @@ import json
 from typing import Dict
 from unittest import TestCase
 
-from json_object import JSONObject
+from python_easy_json import JSONObject
 
 
 class BaseTestCase(TestCase):
