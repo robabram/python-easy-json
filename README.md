@@ -1,23 +1,22 @@
 **********************************************************************************
-JSONObject: simple, yet powerful, JSON/python dictionary to object deserialization  
+easy-json: simple, yet powerful, JSON/python dictionary to object deserialization  
 **********************************************************************************
 
-**JSONObject** is a recursive JSON to python object deserializer with support for defining data models and casting data to python using type hint annotations. 
+**easy-json** is a recursive JSON to python object deserializer with support for defining data models and casting data to python using type hint annotations. 
 
 The python-json-object can be used to:
 
 - **Deserialize:** Recursively convert a JSON string or python dictionary to a python object
 - **Serialize:** Export the object data to a JSON string or python dictionary
+- **Type Hinting Integration:** Convert JSON values to specific types by creating models and type hints.
 - **Define Data Models:** Create simple, yet powerful data models for working with data from any source
 - **IDE Auto Completion:** IDEs with auto-completion and support python type hinting will auto-complete model properties
-- **Type Casting:** Convert JSON values to specific types by creating models and type hints.
-- **Hashing:** Repeatable hashing algorithm allows easy data comparisons
 
 
 Get It Now
 ==========
 
-    Too many like named projects on PyPi.  Need to find a new package name.
+    $ pip install easy-json
 
 Why a JSON Object library?
 ==========================
@@ -29,7 +28,7 @@ After years of python development, I grew tired of receiving data from APIs, dat
 
 With JSONObject this may be re-written as:
 
-    from json_object import JSONObject
+    from easy_json import JSONObject
 
     for row in [JSONObject(r) for r in results]:
         if row.the_key[0].another_key == 'the_value':
@@ -43,13 +42,13 @@ Simple Examples
 
 Data from a JSON String
 
-    from json_object import JSONObject
+    from easy_json import JSONObject
     
     # JSON string
     obj = JSONObject('{"test_key": "test_value"}')
     print(obj.to_json())
 
-    $ {"test_key": "test_value"}
+    : {"test_key": "test_value"}
 
 Data from a python dictionary
 
@@ -57,13 +56,13 @@ Data from a python dictionary
     obj = JSONObject({'test_key': 'test_value'})
     print(obj.to_json())
 
-    $ {"test_key": "test_value"}
+    : {"test_key": "test_value"}
 
 
 Data Models For Anything
 ========================
 
-Using JSONObject, you can create data models, including deeply nested models and arrays, from any JSON or dictionary. Additionally, python type hinting can be used to cast values to the type defined by the type hints.
+Using the easy-json JSONObject class, you can create data models, including deeply nested models and arrays, from any JSON or dictionary. Additionally, python type hinting can be used to cast values to the type defined by the type hints.
 
 As a bonus, IDEs with auto-completion and support python type hinting will auto-complete model properties as you type. 
 
@@ -95,9 +94,9 @@ This example shows how to define nested/child data models, including lists of da
     $ Cake: Devil's Food Cake (4 ingredents).
 
 
-Automatically Convert JSON Values
-=================================
-If a model has been defined and the properties have python type hint annotations, the JSONObject can convert values to the annotation type.
+Type Hints Automatically Convert JSON Values
+============================================
+If a model has been defined and the properties have python Type Hint annotations, the JSONObject can convert values to the annotation types.
 
     from datetime import datetime 
 
@@ -117,7 +116,7 @@ If a model has been defined and the properties have python type hint annotations
 Project Links
 =============
 
-- PyPI: https://pypi.python.org/pypi/python-json-object
+- PyPI: https://pypi.python.org/pypi/python-easy-json
 - Issues: https://github.com/robabram/Python-JSONObject/issues
 
 License
