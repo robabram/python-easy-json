@@ -3,7 +3,7 @@
 # file 'LICENSE', which is part of this source code package.
 #
 from datetime import date, datetime
-from json_object import JSONObject
+from python_easy_json import JSONObject
 from tests.base_test import BaseTestCase
 from typing import List
 
