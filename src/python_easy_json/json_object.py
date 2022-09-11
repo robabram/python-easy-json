@@ -20,7 +20,7 @@ class JSONObject:
 
     def _get_annot_cls(self, key: str):
         """
-        Return annotation class if available, otherwise JSONObject class
+        Return defined annotation class if available, otherwise JSONObject class
         :param key: Key in self.__annotations__.
         :return: Annotation class or JSONObject class
         """
@@ -35,7 +35,7 @@ class JSONObject:
 
     def __init__(self, data: Union[Dict, str, None] = None, cast_types: bool = False, ordered: bool = False):
         """
-        Load the dictionary or JSON string in to ourselves as properties
+        Load the dictionary or JSON string data argument into ourselves as properties.
         :param data: Dictionary or valid JSON string.
         :param cast_types: If properties of this class are type annotated, try to cast them.
         :param ordered: Use OrderedDict() if set, otherwise use dict().
@@ -109,22 +109,16 @@ class JSONObject:
             return obj.isoformat()
         return obj.__repr__()
 
-    def to_json(self, indent=None):
-        """ Export config as json """
+    def to_json(self, indent: int = None):
+        """
+        Export stored data as a json string.
+        :param indent: Positive integer value for formatting JSON string indenting.
+        """
         return json.dumps(self._clean_data(), default=self._json_serial, indent=indent)
-
-    def hash(self, hash_algo=hashlib.sha1):
-        """
-        Hash the object data using SHA1 algo.
-        :param hash_algo: A hashlib algo function.
-        :returns: hashlib HASH object.
-        """
-        val = json.dumps(self._clean_data(), default=self._json_serial, sort_keys=True)
-        return hash_algo(val.encode('utf-8'))
 
     def to_dict(self, recursive: bool = True, dates_to_str: bool = False):
         """
-        Export config as json
+        Export stored data as a python dictionary object.
         :param recursive: Boolean, recursively convert nested JSONObjects to a dict
         :param dates_to_str: Boolean, convert all date or datetime values to string.
         """
@@ -146,6 +140,15 @@ class JSONObject:
                 data[k] = v
 
         return data
+
+    def hash(self, hash_algo=hashlib.sha1):
+        """
+        Hash the stored data using a hashlib algo in a repeatable way.
+        :param hash_algo: A hashlib algo function.
+        :returns: hashlib HASH object.
+        """
+        data = json.dumps(self._clean_data(), default=self._json_serial, sort_keys=True)
+        return hash_algo(data.encode('utf-8'))
 
     def __repr__(self):
         return self.to_json()
