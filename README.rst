@@ -155,11 +155,6 @@ Documentation
         :param dates_to_str: Boolean, convert all date or datetime values to string.
         :returns: dictionary object
 
-    JSONObject.hash(self, hash_algo=hashlib.sha1):        
-        Hash the stored data using a hashlib algo in a repeatable way.
-        :param hash_algo: A hashlib algo function.
-        :returns: hashlib HASH object.
-
     
 Project Links
 =============
