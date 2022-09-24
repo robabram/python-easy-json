@@ -141,14 +141,5 @@ class JSONObject:
 
         return data
 
-    def hash(self, hash_algo=hashlib.sha1):
-        """
-        Hash the stored data using a hashlib algo in a repeatable way.
-        :param hash_algo: A hashlib algo function.
-        :returns: hashlib HASH object.
-        """
-        data = json.dumps(self._clean_data(), default=self._json_serial, sort_keys=True)
-        return hash_algo(data.encode('utf-8'))
-
     def __repr__(self):
         return self.to_json()

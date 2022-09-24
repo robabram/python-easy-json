@@ -6,7 +6,7 @@ import os
 
 from setuptools import setup, find_packages
 
-__VERSION__ = "1.0.0"
+__VERSION__ = "1.0.1"
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -60,6 +60,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     test_suite="tests",
     project_urls={
