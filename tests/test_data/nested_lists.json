@@ -1,0 +1,22 @@
+{
+  "topping": [
+    {
+      "id": "5001",
+      "type": "None"
+    },
+    {
+      "id": "5002",
+      "type": "Glazed"
+    }
+  ],
+  "string_list": [
+    "abc",
+    "def",
+    "xyz"
+  ],
+  "integer_list": [
+    1,
+    2,
+    3
+  ]
+}
