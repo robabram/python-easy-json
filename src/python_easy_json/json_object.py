@@ -67,7 +67,7 @@ class JSONObject:
                         elif isinstance(i, str):
                             try:
                                 _tmp_data = json.loads(i)
-                                if _tmp_data:
+                                if _tmp_data and isinstance(_tmp_data, dict):
                                     _tmp.append(self._get_annot_cls(k)(_tmp_data, cast_types=cast_types,
                                                                        ordered=ordered))
                                 else:
