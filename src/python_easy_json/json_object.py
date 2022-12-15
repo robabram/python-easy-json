@@ -87,8 +87,14 @@ class JSONObject:
                             elif self.__annotations__[k] == datetime.datetime:
                                 self.__dict__[k] = dt_parser.parse(str(v))
                             else:
-                                self.__dict__[k] = self.__annotations__[k](str(v))
+                                try:
+                                    self.__dict__[k] = self.__annotations__[k](str(v))
+                                except ValueError:
+                                    # try original type in case annotation type is an Enum and value is an integer.
+                                    self.__dict__[k] = self.__annotations__[k](v)
                         except TypeError:
+                            pass
+                        except ValueError:
                             pass
 
         if _cleaned_data:
