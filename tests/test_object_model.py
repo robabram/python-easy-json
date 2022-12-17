@@ -42,6 +42,11 @@ class CakeModel(JSONObject):
     topping: List[CakeToppingTypeModel]
 
 
+class IncompleteCakeModel(CakeModel):
+    # Force topping to just be a plain list.
+    topping: List = None
+
+
 class TestObjectModel(BaseTestCase):
     """ Test using JSONObject for data models """
 
@@ -141,3 +146,16 @@ class TestObjectModel(BaseTestCase):
 
         self.assertEqual(len(obj.topping), 7)
         self.assertEqual(len(obj.batters.batter), 4)
+
+    def test_incomplete_cake_models(self):
+        """ Test an incomplete annotated CakeModel model, test incomplete annotations for nested objects. """
+        obj = IncompleteCakeModel(self.json_data.nested_data_1)
+
+        self.assertIsInstance(obj, IncompleteCakeModel)
+        self.assertIsInstance(obj.topping, list)
+        self.assertIsInstance(obj.topping[0], JSONObject)
+
+        # Check that types were *NOT* converted to the property annotation type, because the type annotations
+        # are missing in this case.
+        self.assertIsInstance(obj.topping[0].id, str)
+        self.assertEqual(obj.topping[0].id, "5001")
