@@ -30,7 +30,10 @@ class JSONObject:
             # See if this annotation is a list of objects, if so, get the first
             # available object type in the list.
             if hasattr(cls_, '_name') and cls_._name == 'List':
-                cls_ = cls_.__args__[0]
+                try:
+                    cls_ = cls_.__args__[0]
+                except AttributeError:
+                    pass
         return cls_
 
     def __init__(self, data: Union[Dict, str, None] = None, cast_types: bool = False, ordered: bool = False):
@@ -63,7 +66,10 @@ class JSONObject:
                     _tmp = list()
                     for i in v:
                         if isinstance(i, dict):
-                            _tmp.append(self._get_annot_cls(k)(i, cast_types=cast_types, ordered=ordered))
+                            try:
+                                _tmp.append(self._get_annot_cls(k)(i, cast_types=cast_types, ordered=ordered))
+                            except TypeError:
+                                _tmp.append(JSONObject(i, cast_types=cast_types, ordered=ordered))
                         elif isinstance(i, str):
                             try:
                                 _tmp_data = json.loads(i)
