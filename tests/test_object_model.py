@@ -3,6 +3,8 @@
 # file 'LICENSE', which is part of this source code package.
 #
 from datetime import date, datetime
+from dateutil import parser as du_parser
+import json
 from python_easy_json import JSONObject
 from tests.base_test import BaseTestCase
 from typing import List
@@ -159,3 +161,21 @@ class TestObjectModel(BaseTestCase):
         # are missing in this case.
         self.assertIsInstance(obj.topping[0].id, str)
         self.assertEqual(obj.topping[0].id, "5001")
+
+    def test_to_dict_datetime_conversion(self):
+        """ Test that when using the "to_dict()" method that datetime values are handled correctly. """
+
+        input = json.loads(self.json_data.simple)
+        input['field_date'] = du_parser.parse(input['field_date']).date()
+        input['field_datetime'] = du_parser.parse(input['field_datetime'])
+
+        obj = SimpleModel(input)
+
+        # Test that date and datetime values are not converted to string
+        data = obj.to_dict(dates_to_str=False)
+        self.assertIsInstance(data['field_date'], date)
+        self.assertIsInstance(data['field_datetime'], datetime)
+
+        data = obj.to_dict(dates_to_str=True)
+        self.assertIsInstance(data['field_date'], str)
+        self.assertIsInstance(data['field_datetime'], str)
