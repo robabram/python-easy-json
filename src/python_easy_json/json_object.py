@@ -138,7 +138,7 @@ class JSONObject:
         for k, v in self._clean_data().items():
             if isinstance(v, JSONObject) and recursive is True:
                 data[k] = v.to_dict(recursive=recursive, dates_to_str=dates_to_str)
-            elif isinstance(v, (datetime.datetime, datetime.date)):
+            elif isinstance(v, (datetime.datetime, datetime.date)) and dates_to_str is True:
                 data[k] = self._json_serial(v)
             elif isinstance(v, list):
                 nl = list()
