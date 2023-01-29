@@ -3,7 +3,6 @@
 # file 'LICENSE', which is part of this source code package.
 #
 import datetime
-import hashlib
 import json
 
 from collections import OrderedDict
@@ -102,6 +101,12 @@ class JSONObject:
                             pass
                         except ValueError:
                             pass
+
+        # Look for any properties that have a default value on the class, but were not in the 'data' argument.
+        if hasattr(self, '__annotations__'):
+            for k in list(self.__annotations__.keys()):
+                if k not in self.__dict__ and hasattr(self, k) and getattr(self, k) is not None:
+                    self.__dict__[k] = getattr(self, k)
 
         if _cleaned_data:
             self._clean_data()
