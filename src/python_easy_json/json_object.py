@@ -4,6 +4,7 @@
 #
 import datetime
 import json
+import inspect
 
 from collections import OrderedDict
 from dateutil import parser as dt_parser
@@ -92,21 +93,28 @@ class JSONObject:
                             elif self.__annotations__[k] == datetime.datetime:
                                 self.__dict__[k] = dt_parser.parse(str(v))
                             else:
+                                # Try setting the Enum class by value
                                 try:
                                     self.__dict__[k] = self.__annotations__[k](str(v))
                                 except ValueError:
                                     # try original type in case annotation type is an Enum and value is an integer.
-                                    self.__dict__[k] = self.__annotations__[k](v)
+                                    try:
+                                        self.__dict__[k] = self.__annotations__[k](v)
+                                    except ValueError:
+                                        # Try setting the Enum value by Key instead of value
+                                        self.__dict__[k] = self.__annotations__[k][str(v)]
                         except TypeError:
                             pass
                         except ValueError:
                             pass
 
         # Look for any properties that have a default value on the class, but were not in the 'data' argument.
-        if hasattr(self, '__annotations__'):
-            for k in list(self.__annotations__.keys()):
-                if k not in self.__dict__ and hasattr(self, k) and getattr(self, k) is not None:
-                    self.__dict__[k] = getattr(self, k)
+        members = dict(inspect.getmembers(self.__class__, lambda a: not inspect.isroutine(a)))
+        for k, v in members.items():
+            if k.startswith('_'):
+                continue
+            if k not in self.__dict__ and hasattr(self, k) and getattr(self, k) is not None:
+                self.__dict__[k] = v
 
         if _cleaned_data:
             self._clean_data()
