@@ -4,6 +4,7 @@
 #
 import datetime
 import json
+import inspect
 
 from collections import OrderedDict
 from dateutil import parser as dt_parser
@@ -103,10 +104,12 @@ class JSONObject:
                             pass
 
         # Look for any properties that have a default value on the class, but were not in the 'data' argument.
-        if hasattr(self, '__annotations__'):
-            for k in list(self.__annotations__.keys()):
-                if k not in self.__dict__ and hasattr(self, k) and getattr(self, k) is not None:
-                    self.__dict__[k] = getattr(self, k)
+        members = dict(inspect.getmembers(self.__class__, lambda a: not inspect.isroutine(a)))
+        for k, v in members.items():
+            if k.startswith('_'):
+                continue
+            if k not in self.__dict__ and hasattr(self, k) and getattr(self, k) is not None:
+                self.__dict__[k] = v
 
         if _cleaned_data:
             self._clean_data()
