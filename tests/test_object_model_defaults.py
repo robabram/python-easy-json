@@ -4,11 +4,11 @@
 #
 from datetime import date, datetime
 from enum import Enum, IntEnum
+
 from dateutil import parser as du_parser
-import json
+
 from python_easy_json import JSONObject
 from tests.base_test import BaseTestCase
-from typing import List
 
 
 class TestEnum(Enum):
@@ -128,3 +128,14 @@ class TestObjectModel(BaseTestCase):
 
         self.assertIn('field_int_enum_value', data)
         self.assertEqual(data['field_int_enum_value'], TestIntEnum.Steel)
+
+    def test_simple_model_enum_by_key(self):
+        """
+        Test that the enum property can be set by the Enum key instead of value, when cast_types is True.
+        """
+        # Instantiate the class with Enum property key names, instead of Enum values.
+        obj = SimpleDefaultsModel({'field_enum_value': 'Peach', 'field_int_enum_value': 'Lithium'}, cast_types=True)
+
+        self.assertIsInstance(obj, SimpleDefaultsModel)
+        self.assertEqual(obj.field_enum_value, TestEnum.Peach)
+        self.assertEqual(obj.field_int_enum_value, TestIntEnum.Lithium)
