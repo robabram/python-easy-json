@@ -18,15 +18,17 @@ class JSONObject:
     """
     __data_dict__ = None
 
-    def _get_annot_cls(self, key: str):
+    @staticmethod
+    def _get_annot_cls(annots: dict, key: str):
         """
         Return defined annotation class if available, otherwise JSONObject class
-        :param key: Key in self.__annotations__.
+        :param annots: A compiled set of annotations.
+        :param key: Key to lookup in annots.
         :return: Annotation class or JSONObject class
         """
         cls_ = JSONObject
-        if hasattr(self, '__annotations__') and key in self.__annotations__:
-            cls_ = self.__annotations__[key]
+        if key in annots:
+            cls_ = annots[key]
             # See if this annotation is a list of objects, if so, get the first
             # available object type in the list.
             if hasattr(cls_, '_name') and cls_._name == 'List':
@@ -35,6 +37,25 @@ class JSONObject:
                 except AttributeError:
                     pass
         return cls_
+
+    def _collect_annotations(self, cls_: object):
+        """
+        Recursively collect annotation dictionary values from class and base classes.
+        :param cls_: Child object to inspect
+        """
+        annots = dict()
+        if hasattr(cls_, '__bases__') and cls_.__bases__:
+            for base in cls_.__bases__:
+                if base.__name__ == 'object':
+                    continue
+                result = self._collect_annotations(base)
+                annots.update(result)
+
+        if hasattr(cls_, '__annotations__'):
+            annots.update(cls_.__annotations__)
+
+        return annots
+
 
     def __init__(self, data: Union[Dict, str, None] = None, cast_types: bool = False, ordered: bool = False):
         """
@@ -49,6 +70,9 @@ class JSONObject:
         if isinstance(data, str):
             data = json.loads(data)
 
+        # Compile the class annotations, along with any base class annotations.
+        annots = self._collect_annotations(self.__class__)
+
         _cleaned_data = None
         if data:
             _cleaned_data = dict() if not ordered else OrderedDict()
@@ -61,20 +85,20 @@ class JSONObject:
                 k = k.replace('-', '_')  # Convert key names to python class property friendly name.
                 _cleaned_data[k] = v
                 if isinstance(v, dict):
-                    self.__dict__[k] = self._get_annot_cls(k)(v, cast_types=cast_types, ordered=ordered)
+                    self.__dict__[k] = self._get_annot_cls(annots, k)(v, cast_types=cast_types, ordered=ordered)
                 elif isinstance(v, list):
                     _tmp = list()
                     for i in v:
                         if isinstance(i, dict):
                             try:
-                                _tmp.append(self._get_annot_cls(k)(i, cast_types=cast_types, ordered=ordered))
+                                _tmp.append(self._get_annot_cls(annots, k)(i, cast_types=cast_types, ordered=ordered))
                             except TypeError:
                                 _tmp.append(JSONObject(i, cast_types=cast_types, ordered=ordered))
                         elif isinstance(i, str):
                             try:
                                 _tmp_data = json.loads(i)
                                 if _tmp_data and isinstance(_tmp_data, dict):
-                                    _tmp.append(self._get_annot_cls(k)(_tmp_data, cast_types=cast_types,
+                                    _tmp.append(self._get_annot_cls(annots, k)(_tmp_data, cast_types=cast_types,
                                                                        ordered=ordered))
                                 else:
                                     _tmp.append(i)  # For when the value is a string = 'null'.
@@ -86,23 +110,23 @@ class JSONObject:
                 else:
                     self.__dict__[k] = v
                     # Try to cast values to annotation type if type annotation have been set.
-                    if cast_types is True and hasattr(self, '__annotations__') and k in self.__annotations__:
+                    if cast_types is True and k in annots:
                         try:
-                            if self.__annotations__[k] == datetime.date:
+                            if annots[k] == datetime.date:
                                 self.__dict__[k] = dt_parser.parse(str(v)).date()
-                            elif self.__annotations__[k] == datetime.datetime:
+                            elif annots[k] == datetime.datetime:
                                 self.__dict__[k] = dt_parser.parse(str(v))
                             else:
                                 # Try setting the Enum class by value
                                 try:
-                                    self.__dict__[k] = self.__annotations__[k](str(v))
+                                    self.__dict__[k] = annots[k](str(v))
                                 except ValueError:
                                     # try original type in case annotation type is an Enum and value is an integer.
                                     try:
-                                        self.__dict__[k] = self.__annotations__[k](v)
+                                        self.__dict__[k] = annots[k](v)
                                     except ValueError:
                                         # Try setting the Enum value by Key instead of value
-                                        self.__dict__[k] = self.__annotations__[k][str(v)]
+                                        self.__dict__[k] = annots[k][str(v)]
                         except TypeError:
                             pass
                         except ValueError:
