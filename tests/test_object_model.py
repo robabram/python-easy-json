@@ -7,7 +7,7 @@ from dateutil import parser as du_parser
 import json
 from python_easy_json import JSONObject
 from tests.base_test import BaseTestCase
-from typing import List
+from typing import List, Union, Optional
 
 
 # Represent the test_data/simple.json
@@ -47,6 +47,13 @@ class CakeModel(JSONObject):
 class IncompleteCakeModel(CakeModel):
     # Force topping to just be a plain list.
     topping: List = None
+
+
+class PythonTypingUnionModel(JSONObject):
+    # Test that Union type hints work correctly.
+    data: Union[str, int, CakeModel] = None
+    platform: Optional[CakeBatterTypeModel] = None
+    settings: Optional[JSONObject] = None
 
 
 class TestObjectModel(BaseTestCase):
@@ -165,11 +172,11 @@ class TestObjectModel(BaseTestCase):
     def test_to_dict_datetime_conversion(self):
         """ Test that when using the "to_dict()" method that datetime values are handled correctly. """
 
-        input = json.loads(self.json_data.simple)
-        input['field_date'] = du_parser.parse(input['field_date']).date()
-        input['field_datetime'] = du_parser.parse(input['field_datetime'])
+        input_ = json.loads(self.json_data.simple)
+        input_['field_date'] = du_parser.parse(input_['field_date']).date()
+        input_['field_datetime'] = du_parser.parse(input_['field_datetime'])
 
-        obj = SimpleModel(input)
+        obj = SimpleModel(input_)
 
         # Test that date and datetime values are not converted to string
         data = obj.to_dict(dates_to_str=False)
@@ -179,3 +186,67 @@ class TestObjectModel(BaseTestCase):
         data = obj.to_dict(dates_to_str=True)
         self.assertIsInstance(data['field_date'], str)
         self.assertIsInstance(data['field_datetime'], str)
+
+    def test_typing_union(self):
+        """ Test that properties annotated with Union work correctly when they include a JSONObject """
+
+        # Test string value in Union property
+        input_ = {
+            'data': 'No Data',
+            'platform': None
+        }
+
+        obj = PythonTypingUnionModel(input_, cast_types=True)
+
+        self.assertEqual(obj.data, 'No Data')
+        self.assertIsInstance(obj.data, str)
+
+        # Test integer value in Union property
+        input_['data'] = 20
+
+        obj = PythonTypingUnionModel(input_, cast_types=True)
+
+        self.assertEqual(obj.data, 20)
+
+        # Test CakeModel object in Union property
+        input_['data'] = {'id': 1, 'type': 'bunt'}
+
+        obj = PythonTypingUnionModel(input_, cast_types=True)
+
+        self.assertIsInstance(obj.data, CakeModel)
+        self.assertEqual(obj.data.id, '1')
+        self.assertEqual(obj.data.type, 'bunt')
+
+    def test_typing_optional(self):
+        """ Test that properties annotated with Optional work correctly when they include a JSONObject """
+
+        # Test None value in Optional properties
+        input_ = {
+            'data': 'No Data',
+            'platform': None,
+            'settings': None
+        }
+
+        obj = PythonTypingUnionModel(input_, cast_types=True)
+
+        self.assertEqual(obj.data, 'No Data')
+
+        self.assertIsNone(obj.platform)
+        self.assertIsNone(obj.settings)
+
+        # Test dict value in Optional properties
+        input_ = {
+            'data': 'No Data',
+            'platform': {'id': 1, 'type': 'bunt'},
+            'settings': {'temp': 250.0, 'time': 45.0}
+        }
+
+        obj = PythonTypingUnionModel(input_, cast_types=True)
+        self.assertIsInstance(obj.platform, CakeBatterTypeModel)
+
+        # Test subclass of JSONObject
+        self.assertEqual(obj.platform.id, 1)
+        self.assertEqual(obj.platform.type, 'bunt')
+        # Test JSONObject class
+        self.assertEqual(obj.settings.temp, 250.0)
+        self.assertEqual(obj.settings.time, 45.0)

@@ -3,13 +3,13 @@
 # file 'LICENSE', which is part of this source code package.
 #
 import datetime
-import json
 import inspect
+import json
+import typing
 
 from collections import OrderedDict
 from dateutil import parser as dt_parser
 from json import JSONDecodeError
-from typing import Dict, Union
 
 
 class JSONObject:
@@ -36,6 +36,19 @@ class JSONObject:
                     cls_ = cls_.__args__[0]
                 except AttributeError:
                     pass
+
+            # Check for union annotation types.
+            if type(cls_) == typing._UnionGenericAlias:
+                for cls_item in cls_.__dict__['__args__']:
+                    if type(cls_item) == type(None):
+                        continue
+                    # Try to find the right object class in the Union types list, ignore 'builtin' types.
+                    if issubclass(type(cls_item), object):
+                        if cls_item.__module__ == 'builtins':
+                            continue
+                        return cls_item
+                # Keep things sane and just return a generic JSONObject as a fallback.
+                cls_ = JSONObject
         return cls_
 
     def _collect_annotations(self, cls_: object):
@@ -57,7 +70,8 @@ class JSONObject:
         return annots
 
 
-    def __init__(self, data: Union[Dict, str, None] = None, cast_types: bool = False, ordered: bool = False):
+    def __init__(self, data: typing.Union[typing.Dict, str, None] = None, cast_types: bool = False,
+                 ordered: bool = False):
         """
         Load the dictionary or JSON string data argument into ourselves as properties.
         :param data: Dictionary or valid JSON string.
@@ -85,7 +99,11 @@ class JSONObject:
                 k = k.replace('-', '_')  # Convert key names to python class property friendly name.
                 _cleaned_data[k] = v
                 if isinstance(v, dict):
-                    self.__dict__[k] = self._get_annot_cls(annots, k)(v, cast_types=cast_types, ordered=ordered)
+                    try:
+                        cls_ = self._get_annot_cls(annots, k)
+                        self.__dict__[k] = cls_(v, cast_types=cast_types, ordered=ordered)
+                    except TypeError:
+                        self.__dict__[k] = JSONObject(v, cast_types=cast_types, ordered=ordered)
                 elif isinstance(v, list):
                     _tmp = list()
                     for i in v:
