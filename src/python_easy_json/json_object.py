@@ -39,6 +39,7 @@ class JSONObject:
                     pass
 
             # Check if typing annotation class is a Union type.
+            # Try to find the right object class in the Union types list, ignore 'builtin' types.
             if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
                 for cls_item in cls_.__dict__['__args__']:
                     if type(cls_item) == type(None):
