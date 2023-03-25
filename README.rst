@@ -1,4 +1,4 @@
-![Unittests](https://github.com/robabram/python-easy-json/actions/workflows/unittests.yml/badge.svg)
+![Unittest Run Status](https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg)
 
 
 ****************************************************************************************
@@ -25,7 +25,7 @@ Get It Now
 Why a another JSON to Object library?
 =====================================
 After years of python development, I grew tired of receiving data from APIs, database, csv files and so on and working 
-with them as python dictionaries. The simple JSON deserializer library options I saw really didn't fit how easy I felt 
+with them as python dictionaries. The "simple" JSON deserializer library options I saw really didn't fit how easy I felt
 that deserializing to a JSON object should be.  Additionally, I wanted to create simple data model classes and 
 using python "Type Hinting" to define property value types. 
 
