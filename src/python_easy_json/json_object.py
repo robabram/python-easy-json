@@ -144,7 +144,13 @@ class JSONObject:
                                         self.__dict__[k] = annots[k](v)
                                     except ValueError:
                                         # Try setting the Enum value by Key instead of value
-                                        self.__dict__[k] = annots[k][str(v)]
+                                        try:
+                                            # Hyphens in an enum value is not allowed, convert to underscore.
+                                            if isinstance(v, str) and '-' in v:
+                                                v = v.replace('-', '_')
+                                            self.__dict__[k] = annots[k][str(v)]
+                                        except ValueError:
+                                            pass
                         except TypeError:
                             pass
                         except ValueError:
