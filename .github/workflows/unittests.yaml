@@ -1,4 +1,4 @@
-name: Unittests Status
+name: Tests
 
 on: [push]
 

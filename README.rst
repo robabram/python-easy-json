@@ -1,4 +1,5 @@
-![Unittest Run Status](https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg)
+.. image:: https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg
+  :alt: Unittest Completion Status
 
 
 ****************************************************************************************
