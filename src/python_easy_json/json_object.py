@@ -32,7 +32,7 @@ class JSONObject:
             cls_ = annots[key]
             # See if this annotation is a list of objects, if so, get the first
             # available object type in the list.
-            if hasattr(cls_, '_name') and cls_._name == 'List':
+            if hasattr(cls_, '_name') and hasattr(cls_, '__args__') and cls_._name == 'List':
                 cls_ = cls_.__args__[0]
 
             # Check if typing annotation class is a Union type.
