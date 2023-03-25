@@ -22,6 +22,7 @@ jobs:
           export PYTHONPATH=./src
           coverage run -m unittest discover -v -s tests
       - name: Generate Coverage Report
+        run: |
           coverage report
       - name: Creating coverage folder
         run: |
