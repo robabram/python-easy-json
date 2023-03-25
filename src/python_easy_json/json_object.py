@@ -5,6 +5,7 @@
 import datetime
 import inspect
 import json
+import sys
 import typing
 
 from collections import OrderedDict
@@ -37,18 +38,19 @@ class JSONObject:
                 except AttributeError:
                     pass
 
-            # Check for union annotation types.
-            if type(cls_) == typing._UnionGenericAlias:
-                for cls_item in cls_.__dict__['__args__']:
-                    if type(cls_item) == type(None):
-                        continue
-                    # Try to find the right object class in the Union types list, ignore 'builtin' types.
-                    if issubclass(type(cls_item), object):
-                        if cls_item.__module__ == 'builtins':
+            # Python >= 3.9 : Check for union annotation types.
+            if sys.version_info[0] == 3 and sys.version_info[1] >= 9:
+                if type(cls_) == typing._UnionGenericAlias:
+                    for cls_item in cls_.__dict__['__args__']:
+                        if type(cls_item) == type(None):
                             continue
-                        return cls_item
-                # Keep things sane and just return a generic JSONObject as a fallback.
-                cls_ = JSONObject
+                        # Try to find the right object class in the Union types list, ignore 'builtin' types.
+                        if issubclass(type(cls_item), object):
+                            if cls_item.__module__ == 'builtins':
+                                continue
+                            return cls_item
+                    # Keep things sane and just return a generic JSONObject as a fallback.
+                    cls_ = JSONObject
         return cls_
 
     def _collect_annotations(self, cls_: object):
