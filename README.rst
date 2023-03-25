@@ -1,4 +1,9 @@
-.. image:: https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg :alt: Unittest Completion Status  .. image:: https://raw.githubusercontent.com/robabram/python-easy-json/coverage-badge/coverage.svg?raw=true :alt: Code Coverage Status
+|badge1| |badge2|
+
+.. |badge1| image:: https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg
+  :alt: Unittest Completion Status
+.. |badge2| image:: https://raw.githubusercontent.com/robabram/python-easy-json/coverage-badge/coverage.svg?raw=true
+  :alt: Code Coverage Status
 
 
 ****************************************************************************************
