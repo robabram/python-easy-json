@@ -1,3 +1,6 @@
+![Unittests](https://github.com/robabram/python-easy-json/actions/workflows/unittests.yml/badge.svg)
+
+
 ****************************************************************************************
 python-easy-json: simple, yet powerful, JSON/python dictionary to object deserialization  
 ****************************************************************************************
