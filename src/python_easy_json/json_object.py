@@ -38,19 +38,18 @@ class JSONObject:
                 except AttributeError:
                     pass
 
-            # Python >= 3.9 : Check for union annotation types.
-            if sys.version_info[0] == 3 and sys.version_info[1] >= 9:
-                if type(cls_) == typing._UnionGenericAlias:
-                    for cls_item in cls_.__dict__['__args__']:
-                        if type(cls_item) == type(None):
+            # Check if typing annotation class is a Union type.
+            if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
+                for cls_item in cls_.__dict__['__args__']:
+                    if type(cls_item) == type(None):
+                        continue
+                    # Try to find the right object class in the Union types list, ignore 'builtin' types.
+                    if issubclass(type(cls_item), object):
+                        if cls_item.__module__ == 'builtins':
                             continue
-                        # Try to find the right object class in the Union types list, ignore 'builtin' types.
-                        if issubclass(type(cls_item), object):
-                            if cls_item.__module__ == 'builtins':
-                                continue
-                            return cls_item
-                    # Keep things sane and just return a generic JSONObject as a fallback.
-                    cls_ = JSONObject
+                        return cls_item
+                # Keep things sane and just return a generic JSONObject as a fallback.
+                cls_ = JSONObject
         return cls_
 
     def _collect_annotations(self, cls_: object):
