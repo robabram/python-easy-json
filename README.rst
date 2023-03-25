@@ -1,9 +1,11 @@
-|badge1| |badge2|
+|badge1| |badge2| |badge3|
 
 .. |badge1| image:: https://github.com/robabram/python-easy-json/actions/workflows/unittests.yaml/badge.svg
   :alt: Unittest Completion Status
 .. |badge2| image:: https://raw.githubusercontent.com/robabram/python-easy-json/coverage-badge/coverage.svg?raw=true
   :alt: Code Coverage Status
+.. |badge3| image:: https://img.shields.io/badge/python-v3.7%20|%20v3.8%20|%20v3.9%20|%20v3.10%20|%20v3.11-brightgreen
+  :alt: Python v3.7, v3.8, v3.9, v3.10, v3.11
 
 
 ****************************************************************************************
