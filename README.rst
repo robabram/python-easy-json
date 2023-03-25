@@ -4,7 +4,7 @@
   :alt: Unittest Completion Status
 .. |badge2| image:: https://raw.githubusercontent.com/robabram/python-easy-json/coverage-badge/coverage.svg?raw=true
   :alt: Code Coverage Status
-.. |badge3| image:: https://img.shields.io/badge/python-v3.7%20|%20v3.8%20|%20v3.9%20|%20v3.10%20|%20v3.11-brightgreen
+.. |badge3| image:: https://img.shields.io/badge/python-v3.7%20|%20v3.8%20|%20v3.9%20|%20v3.10%20|%20v3.11-blue
   :alt: Python v3.7, v3.8, v3.9, v3.10, v3.11
 
 
