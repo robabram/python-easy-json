@@ -4,9 +4,7 @@
 #
 import os
 import glob
-import json
 
-from typing import Dict
 from unittest import TestCase
 
 from python_easy_json import JSONObject
@@ -23,9 +21,6 @@ class BaseTestCase(TestCase):
         # Current directory should be project root directory.
         cur_dir = os.path.abspath(os.path.curdir)
         test_data_dir = os.path.join(cur_dir, "tests/test_data")
-        if not os.path.exists(test_data_dir):
-            raise FileNotFoundError('Unable to locate test data directory.')
-
         files = glob.glob(os.path.join(test_data_dir, "*.json"))
 
         data = dict()
