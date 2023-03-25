@@ -44,3 +44,11 @@ class TestDataExport(BaseTestCase):
 
         export = obj.to_dict()
         self.assertEqual(data, export)
+
+    def test_nested_1_dict_export_no_recursive(self):
+        """ Test nested JSONObjects, but do not recursively convert them to dictionaries. """
+        data = json.loads(self.json_data.nested_data_1)
+        obj = JSONObject(data)
+
+        export = obj.to_dict(recursive=False)
+        self.assertIsInstance(export['batters'], JSONObject)

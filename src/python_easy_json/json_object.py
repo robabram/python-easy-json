@@ -5,6 +5,7 @@
 import datetime
 import inspect
 import json
+import sys
 import typing
 
 from collections import OrderedDict
@@ -31,24 +32,18 @@ class JSONObject:
             cls_ = annots[key]
             # See if this annotation is a list of objects, if so, get the first
             # available object type in the list.
-            if hasattr(cls_, '_name') and cls_._name == 'List':
-                try:
-                    cls_ = cls_.__args__[0]
-                except AttributeError:
-                    pass
+            if hasattr(cls_, '_name') and hasattr(cls_, '__args__') and cls_._name == 'List':
+                cls_ = cls_.__args__[0]
 
-            # Check for union annotation types.
-            if type(cls_) == typing._UnionGenericAlias:
+            # Check if typing annotation class is a Union type.
+            # Try to find the right object class in the Union types list, ignore 'builtin' types.
+            if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
                 for cls_item in cls_.__dict__['__args__']:
-                    if type(cls_item) == type(None):
-                        continue
                     # Try to find the right object class in the Union types list, ignore 'builtin' types.
                     if issubclass(type(cls_item), object):
                         if cls_item.__module__ == 'builtins':
                             continue
                         return cls_item
-                # Keep things sane and just return a generic JSONObject as a fallback.
-                cls_ = JSONObject
         return cls_
 
     def _collect_annotations(self, cls_: object):
@@ -99,11 +94,8 @@ class JSONObject:
                 k = k.replace('-', '_')  # Convert key names to python class property friendly name.
                 _cleaned_data[k] = v
                 if isinstance(v, dict):
-                    try:
-                        cls_ = self._get_annot_cls(annots, k)
-                        self.__dict__[k] = cls_(v, cast_types=cast_types, ordered=ordered)
-                    except TypeError:
-                        self.__dict__[k] = JSONObject(v, cast_types=cast_types, ordered=ordered)
+                    cls_ = self._get_annot_cls(annots, k)
+                    self.__dict__[k] = cls_(v, cast_types=cast_types, ordered=ordered)
                 elif isinstance(v, list):
                     _tmp = list()
                     for i in v:
@@ -144,10 +136,11 @@ class JSONObject:
                                         self.__dict__[k] = annots[k](v)
                                     except ValueError:
                                         # Try setting the Enum value by Key instead of value
+                                        # Hyphens in an enum property is not allowed, convert to underscore.
+                                        if isinstance(v, str) and '-' in v:
+                                            v = v.replace('-', '_')
                                         self.__dict__[k] = annots[k][str(v)]
                         except TypeError:
-                            pass
-                        except ValueError:
                             pass
 
         # Look for any properties that have a default value on the class, but were not in the 'data' argument.
