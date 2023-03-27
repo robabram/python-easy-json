@@ -5,7 +5,6 @@
 import datetime
 import inspect
 import json
-import sys
 import typing
 
 from collections import OrderedDict
@@ -27,14 +26,13 @@ class JSONObject:
         :param key: Key to lookup in annots.
         :return: Annotation class or JSONObject class
         """
-        cls_ = JSONObject
+        cls_ = None
         if key in annots:
             cls_ = annots[key]
             # See if this annotation is a list of objects, if so, get the first
             # available object type in the list.
-            if hasattr(cls_, '_name') and hasattr(cls_, '__args__') and cls_._name == 'List':
+            if hasattr(cls_, '_name') and cls_._name == 'List' and hasattr(cls_, '__args__'):
                 cls_ = cls_.__args__[0]
-
             # Check if typing annotation class is a Union type.
             # Try to find the right object class in the Union types list, ignore 'builtin' types.
             if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
@@ -43,7 +41,12 @@ class JSONObject:
                     if issubclass(type(cls_item), object):
                         if cls_item.__module__ == 'builtins':
                             continue
-                        return cls_item
+                        cls_ = cls_item
+                        break
+        # Fallback to JSONObject if needed
+        if not cls_ or cls_.__module__ == 'typing':
+            cls_ = JSONObject
+
         return cls_
 
     def _collect_annotations(self, cls_: object):
@@ -63,7 +66,6 @@ class JSONObject:
             annots.update(cls_.__annotations__)
 
         return annots
-
 
     def __init__(self, data: typing.Union[typing.Dict, str, None] = None, cast_types: bool = False,
                  ordered: bool = False):
@@ -100,10 +102,7 @@ class JSONObject:
                     _tmp = list()
                     for i in v:
                         if isinstance(i, dict):
-                            try:
-                                _tmp.append(self._get_annot_cls(annots, k)(i, cast_types=cast_types, ordered=ordered))
-                            except TypeError:
-                                _tmp.append(JSONObject(i, cast_types=cast_types, ordered=ordered))
+                            _tmp.append(self._get_annot_cls(annots, k)(i, cast_types=cast_types, ordered=ordered))
                         elif isinstance(i, str):
                             try:
                                 _tmp_data = json.loads(i)
