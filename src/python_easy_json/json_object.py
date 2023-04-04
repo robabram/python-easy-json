@@ -119,7 +119,7 @@ class JSONObject:
                 else:
                     self.__dict__[k] = v
                     # Try to cast values to annotation type if type annotation have been set.
-                    if cast_types is True and k in annots:
+                    if v and cast_types is True and k in annots:
                         try:
                             if annots[k] == datetime.date:
                                 self.__dict__[k] = dt_parser.parse(str(v)).date()
