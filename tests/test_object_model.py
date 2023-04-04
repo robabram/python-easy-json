@@ -250,3 +250,25 @@ class TestObjectModel(BaseTestCase):
         # Test JSONObject class
         self.assertEqual(obj.settings.temp, 250.0)
         self.assertEqual(obj.settings.time, 45.0)
+
+    def test_null_values_for_annotated_class(self):
+        """ Pass None for values to annotated class """
+
+        input_ = {
+            'field_bool': None,
+            'field_int': None,
+            'field_float': None,
+            'field_str': None,
+            'field_date': None,
+            'field_datetime':  None
+        }
+
+        obj = SimpleModel(input_, cast_types=True)
+        self.assertIsInstance(obj, SimpleModel)
+
+        self.assertIsNone(obj.field_bool)
+        self.assertIsNone(obj.field_int)
+        self.assertIsNone(obj.field_float)
+        self.assertIsNone(obj.field_str)
+        self.assertIsNone(obj.field_date)
+        self.assertIsNone(obj.field_datetime)
