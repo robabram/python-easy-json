@@ -14,6 +14,10 @@ class TestEnum(Enum):
     SecondValue = 2
 
 
+class TestStrEnum(str, Enum):
+    FirstStrValue = "10"
+    SecondStrValue = "20"
+
 class TestIntEnum(IntEnum):
     FirstValue = 1
     SecondValue = 2
@@ -30,6 +34,12 @@ class ObjectWithEnum(JSONObject):
     test_int_enum: TestIntEnum = None
     underscore_enum: TestUnderscoreEnum = None
 
+
+class ObjectWithStrEnum(JSONObject):
+    """ JSONObject object class with Enum types """
+    timestamp: datetime = None
+    test_enum: TestStrEnum = None
+    test_int_enum: TestStrEnum = None
 
 class TestJSONWithEnum(BaseTestCase):
 
@@ -56,6 +66,28 @@ class TestJSONWithEnum(BaseTestCase):
         # TestIntEnum
         self.assertIsInstance(obj.test_int_enum, TestIntEnum)
         self.assertEqual(obj.test_int_enum, TestIntEnum.SecondValue)
+
+    def test_str_enum(self):
+        """ Test an enum with string values """
+        ts = datetime.utcnow()
+
+        data = {
+            'timestamp': ts.isoformat(),
+            'test_enum': TestStrEnum.FirstStrValue.value,
+            'test_int_enum': int(TestStrEnum.SecondStrValue.value)
+        }
+
+        obj = ObjectWithStrEnum(data, cast_types=True)
+
+        self.assertIsInstance(obj, JSONObject)
+
+        # TestEnum
+        self.assertIsInstance(obj.test_enum, TestStrEnum)
+        self.assertEqual(obj.test_enum, TestStrEnum.FirstStrValue)
+
+        # TestIntEnum
+        self.assertIsInstance(obj.test_int_enum, TestStrEnum)
+        self.assertEqual(obj.test_int_enum, TestStrEnum.SecondStrValue)
 
     def test_enum_with_hyphen_key(self):
         """

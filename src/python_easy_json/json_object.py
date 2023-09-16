@@ -101,39 +101,32 @@ class JSONObject:
                 return v
 
         for t in annot_types:
-            try:
-                if t == datetime.date and not isinstance(v, datetime.date):
-                    v = dt_parser.parse(str(v)).date()
-                elif t == datetime.datetime and not isinstance(v, datetime.datetime):
-                    v = dt_parser.parse(str(v))
-                elif isinstance(t, _enum_t):
-                    # Try setting the Enum class by value
+            if t == datetime.date and not isinstance(v, datetime.date):
+                v = dt_parser.parse(str(v)).date()
+            elif t == datetime.datetime and not isinstance(v, datetime.datetime):
+                v = dt_parser.parse(str(v))
+            elif isinstance(t, _enum_t):
+                # Try setting the Enum class by value
+                try:
+                    v = t(v)
+                    break
+                except ValueError:
+                    # try converting type to string and set Enum class by value.
                     try:
                         v = t(str(v))
                         break
                     except ValueError:
-                        # try original type in case annotation type is an Enum and value is an integer.
-                        try:
-                            v = t(v)
-                            break
-                        except ValueError:
-                            # Try setting the Enum value by Key instead of value
-                            # Hyphens in an enum property is not allowed, convert to underscore.
-                            if isinstance(v, str) and '-' in v:
-                                v = v.replace('-', '_')
-                            v = t[str(v)]
-                            break
-                else:
-                    try:
-                        v = t(v)
+                        # Try setting the Enum value by Key instead of value
+                        # Hyphens in an enum property is not allowed, convert to underscore.
+                        if isinstance(v, str) and '-' in v:
+                            v = v.replace('-', '_')
+                        v = t[str(v)]
                         break
-                    except (json.decoder.JSONDecodeError, ValueError, TypeError):
-                        continue
-            except TypeError:
-                continue
+            else:
+                v = t(v)
+                break
 
         return v
-
 
     def __init__(self, data: typing.Union[typing.Dict, str, None] = None, cast_types: bool = False,
                  ordered: bool = False):
@@ -193,8 +186,6 @@ class JSONObject:
 
         # If there are any nested keys, recursively process them.
         for k in self.__nested_keys__:
-            if k not in cleaned_data:
-                continue
             # Fetch annotation class type or JSONObject
             t = self._get_annot_cls(annots, k, ignore_builtins=True)[0]
 
