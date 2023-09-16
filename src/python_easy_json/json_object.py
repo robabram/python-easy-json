@@ -41,7 +41,7 @@ class JSONObject:
             if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
                 for cls_item in cls_.__dict__['__args__']:
                     # Try to find the right object class in the Union types list, ignore 'builtin' types.
-                    if issubclass(type(cls_item), object):
+                    if issubclass(type(cls_item), object) and not isinstance(cls_item, typing.TypeVar):
                         if ignore_builtins and cls_item.__module__ == 'builtins':
                             continue
                         cls_types.append(cls_item)
