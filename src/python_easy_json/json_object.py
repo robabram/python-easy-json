@@ -149,13 +149,12 @@ class JSONObject:
 
         cleaned_data = dict() if not ordered else OrderedDict()
 
-        # Inspect the class
-        meta: typing.Dict = dict(vars(self.__class__))
         # Collect the class annotations, along with any base class annotations.
         annots: typing.Dict = self._collect_annotations(self.__class__)
+        # Collect the keys that contain nested data
         self.__nested_keys__ = [k for k in data.keys() if isinstance(data[k], (dict, list))] if data else dict()
 
-        # Ensure keys and values are not byte strings.
+        # Ensure keys and values are not byte strings and ensure keys value may be used as a property.
         if data:
             cleaned_data.update({self._clean_key(k): self._clean_value(v) for k, v in data.items()})
 
