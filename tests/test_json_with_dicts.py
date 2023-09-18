@@ -59,3 +59,20 @@ class TestListsDict(BaseTestCase):
 
         for v in obj.test_prop:
             self.assertIsInstance(v, JSONObject)
+
+    def test_nested_dict_with_hyphen_key(self):
+        """
+        Test a key with a hyphen containing a nested dictionary.  Any key with a hyphen should have the hyphen
+        converted to an underscore.
+        """
+        data = {
+            'z-report': {
+                'zap-col1': 'abc',
+                'zap-col2': 'xyz'
+            }
+        }
+        obj = JSONObject(data)
+
+        self.assertIsInstance(obj, JSONObject)
+        self.assertTrue(hasattr(obj, 'z_report'))
+        self.assertEqual(obj.z_report.zap_col1, 'abc')
