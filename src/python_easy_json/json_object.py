@@ -5,6 +5,7 @@
 import datetime
 import enum
 import json
+import sys
 import typing
 
 from collections import OrderedDict
@@ -12,6 +13,9 @@ from dateutil import parser as dt_parser
 from json import JSONDecodeError
 
 _enum_t = type(enum.Enum)
+
+# Support OrderedDict for Python versions 3.6 or below.
+_OLD_DICT_VERSION = True if sys.version_info.major == 3 and sys.version_info.minor < 7 else False
 
 
 class JSONObject:
@@ -28,7 +32,6 @@ class JSONObject:
         :return: A list of annotation classes or JSONObject class
         """
         cls_types = list()
-        cls_ = None
         if key in annots:
             cls_ = annots[key]
             # See if this annotation is a list of objects, if so, get the first
@@ -136,27 +139,25 @@ class JSONObject:
         :param cast_types: If properties of this class are type annotated, try to cast them.
         :param ordered: Use OrderedDict() if set, otherwise use dict().
         """
-        # # Support OrderedDict for Python versions 3.6 or below.
-        # self.__data_dict__ = dict() if not ordered else OrderedDict()
-        self.__data_dict__: typing.Dict = dict()
-        # List of keys in the data which contain nested data, IE: list or dict objects.
-        self.__nested_keys__: typing.List[str] = None  # Is there any nested data
+        # Support OrderedDict for Python versions 3.6 or below.
+        self.__dict_cls__ = OrderedDict if _OLD_DICT_VERSION is True and ordered is True else dict
+        cleaned_data = self.__dict_cls__()
 
         if isinstance(data, str):
             data = json.loads(data)
+        # Note: We don't return here when there is no data because there may be class properties with default values.
         if not data:
-            data = dict()
-
-        cleaned_data = dict() if not ordered else OrderedDict()
+            data = self.__dict_cls__()
 
         # Collect the class annotations, along with any base class annotations.
         annots: typing.Dict = self._collect_annotations(self.__class__)
-        # Collect the keys that contain nested data
-        self.__nested_keys__ = [k for k in data.keys() if isinstance(data[k], (dict, list))] if data else dict()
-
-        # Ensure keys and values are not byte strings and ensure keys value may be used as a property.
+        # List of keys in the data which contain nested data, IE: list or dict objects.
         if data:
+            self.__nested_keys__ = [self._clean_key(k) for k in data.keys() if isinstance(data[k], (dict, list))]
+            # Ensure keys and values are not byte strings and ensure keys value may be used as a property.
             cleaned_data.update({self._clean_key(k): self._clean_value(v) for k, v in data.items()})
+        else:
+            self.__nested_keys__ = self.__dict_cls__()
 
         # If there are no annotations and no nested data, just set the class dict property and return.
         if not annots and not self.__nested_keys__:
@@ -233,7 +234,7 @@ class JSONObject:
         :param recursive: Boolean, recursively convert nested JSONObjects to a dict
         :param dates_to_str: Boolean, convert all date or datetime values to string.
         """
-        data = dict()
+        data = self.__dict_cls__()
 
         for k, v in self.__data_dict__.items():
             if isinstance(v, JSONObject) and recursive is True:
