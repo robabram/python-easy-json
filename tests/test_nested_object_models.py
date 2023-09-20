@@ -65,11 +65,8 @@ class ForestUploadModel(JSONObject):
 
         def _json_serial(obj):
             """JSON serializer for objects not serializable by default json code"""
-            if isinstance(obj, (datetime, date)):
-                return obj.isoformat()
             if isinstance(obj, enum.Enum):
                 return obj.value
-            return obj.__repr__()
 
         if self.body:
             if isinstance(self.body, OakTreeModel):
