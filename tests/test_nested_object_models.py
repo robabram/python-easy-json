@@ -4,8 +4,12 @@
 #
 # Test inherited models and multiple inherited models
 #
+import base64
+import enum
+import json
+from datetime import datetime, date
+from typing import Union, Dict
 
-from datetime import datetime
 from dateutil import parser as du_parser
 from enum import Enum
 
@@ -46,6 +50,34 @@ class OakTreeModel(PlantModel, DeciduousModelMixin, SoilModelMixin):
     species: str = 'Oak Tree'
     flowering: bool = False
 
+
+class ForestUploadModel(JSONObject):
+    """ Test class for validating an overridden init method """
+
+    body: Union[OakTreeModel, str, bytes, None] = None
+
+
+    def __init__(self, *args, **kwargs):
+        self.method = 'POST'
+        self.headers = 'Content-Type: application/json'
+
+        super().__init__(*args, **kwargs)
+
+        def _json_serial(obj):
+            """JSON serializer for objects not serializable by default json code"""
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            if isinstance(obj, enum.Enum):
+                return obj.value
+            return obj.__repr__()
+
+        if self.body:
+            if isinstance(self.body, OakTreeModel):
+                self.body = self.body.to_dict(dates_to_str=True)
+            if isinstance(self.body, dict):
+                self.body = json.dumps(self.body, default=_json_serial)
+            if isinstance(self.body, str):
+                self.body = base64.b64encode(self.body.encode('utf-8'))
 
 
 class TestListsDict(BaseTestCase):
@@ -92,3 +124,46 @@ class TestListsDict(BaseTestCase):
 
         # Test default value of None
         self.assertIsNone(obj.soil_type)
+
+    def test_overridden_init_method(self):
+        """ Test that an overridden init method works correctly """
+
+        tree_obj = OakTreeModel({
+            'id': '50',
+            'created': '2023-03-02 19:23:00',
+            'modified': '2023-03-02 19:23:00',
+            'fall_color': 'Red',
+            'lat': '123.123',
+            'long': '456.456'}, cast_types=True)
+
+        self.assertIsInstance(tree_obj, OakTreeModel)
+
+        obj = ForestUploadModel({'body': tree_obj})
+
+        self.assertIsInstance(obj.body, bytes)
+
+        # Properties 'method' and 'headers' should exist
+        self.assertTrue(hasattr(obj, 'method'))
+        self.assertEqual(obj.method, 'POST')
+
+        self.assertTrue(hasattr(obj, 'headers'))
+        self.assertEqual(obj.headers, 'Content-Type: application/json')
+
+        # Decode body property
+        dec_data_str = base64.b64decode(obj.body).decode('utf-8')
+
+        self.assertIsInstance(dec_data_str, str)
+        dec_data = json.loads(dec_data_str)
+
+        self.assertIsInstance(dec_data, dict)
+        orig_data = tree_obj.to_dict(dates_to_str=True)
+        # Ensure the 'fall_color' Enum object is converted to it's value.
+        orig_data['fall_color'] = orig_data['fall_color'].value
+        self.assertDictEqual(orig_data, dec_data)
+
+        # Dump data to dictionary and check that all values are present and correct
+        data = obj.to_dict(dates_to_str=True)
+
+        self.assertIn('method', data)
+        self.assertIn('headers', data)
+        self.assertIn('body', data)

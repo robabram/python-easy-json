@@ -5,6 +5,7 @@
 import datetime
 import enum
 import json
+import re
 import sys
 import typing
 
@@ -16,13 +17,16 @@ _enum_t = type(enum.Enum)
 
 # Support OrderedDict for Python versions 3.6 or below.
 _OLD_DICT_VERSION = True if sys.version_info.major == 3 and sys.version_info.minor < 7 else False
-
+_REGEX_HIDDEN_PROP = re.compile(r'__')
 
 class JSONObject:
     """
     Simple object to recursively convert a dict or json string to object properties
     """
-    __initialized__ = False
+    # Support OrderedDict for Python versions 3.6 or below.
+    __dict_cls__ = OrderedDict if _OLD_DICT_VERSION is True else dict
+    __data_dict__ = None  # Holds a clean copy of the data added to this object.
+
     @staticmethod
     def _get_annot_cls(annots: dict, key: str, ignore_builtins = False) -> typing.List:
         """
@@ -82,13 +86,15 @@ class JSONObject:
         """ Return a clean key or value """
         if isinstance(k, bytes):
             k = str(k, 'utf-8')
-        return k.replace('-', '_')
+        if '-' in k:
+            return k.replace('-', '_')
+        return k
 
     @staticmethod
     def _clean_value(v):
         """ Return a clean key or value """
         if isinstance(v, bytes):
-            v = str(v, 'utf-8')
+            return str(v, 'utf-8')
         return v
 
     @classmethod
@@ -140,62 +146,52 @@ class JSONObject:
         :param cast_types: If properties of this class are type annotated, try to cast them.
         :param ordered: Use OrderedDict() if set, otherwise use dict().
         """
-        # Support OrderedDict for Python versions 3.6 or below.
-        self.__dict_cls__ = OrderedDict if _OLD_DICT_VERSION is True and ordered is True else dict
-        cleaned_data = self.__dict_cls__()
+        # 'self.__data_dict__' may have data already due to self.__setattr__ being called before reaching here.
+        if self.__data_dict__ is None:
+            self.__data_dict__ = self.__dict_cls__()
 
         if isinstance(data, str):
             data = json.loads(data)
-        # Note: We don't return here when there is no data because there may be class properties with default values.
-        if not data:
-            data = self.__dict_cls__()
 
         # Collect the class annotations, along with any base class annotations.
-        annots: typing.Dict = self._collect_annotations(self.__class__)
+        annots = self._collect_annotations(self.__class__)
         # List of keys in the data which contain nested data, IE: list or dict objects.
         if data:
             self.__nested_keys__ = [self._clean_key(k) for k in data.keys() if isinstance(data[k], (dict, list))]
             # Ensure keys and values are not byte strings and ensure keys value may be used as a property.
-            cleaned_data.update({self._clean_key(k): self._clean_value(v) for k, v in data.items()})
+            for k, v in data.items():
+                self.__data_dict__[self._clean_key(k)] = self._clean_value(v)
         else:
+            # cleaned_data = self.__dict_cls__()
             self.__nested_keys__ = self.__dict_cls__()
-
-        # If there are no annotations and no nested data, just set the class dict property and return.
-        if not annots and not self.__nested_keys__:
-            if cleaned_data:
-                for k, v in cleaned_data.items():
-                    self.__dict__[k] = v
-                self.__data_dict__ = cleaned_data
-            self.__initialized__ = True
-            return
 
         if annots:
             if cast_types is True:
                 # If 'cast_types' is True, try to cast values to correct type.
-                for k in cleaned_data.keys():
+                for k in self.__data_dict__.keys():
                     if k in self.__nested_keys__:
                         continue
                     # Attempt to cast the value to the annotation type
-                    cleaned_data[k] = self._cast_to_type(annots, k, cleaned_data[k])
+                    self.__data_dict__[k] = self._cast_to_type(annots, k, self.__data_dict__[k])
 
             # Set default values for any keys that are missing in the 'data' dict.
             for k in annots.keys():
                 if k in self.__class__.__dict__:
                     v = getattr(self.__class__, k)
                     # Only set default values that are not None
-                    if k not in cleaned_data and v is not None:
-                        cleaned_data[k] = v
+                    if k not in self.__data_dict__ and v is not None:
+                        self.__data_dict__[k] = v
 
         # If there are any nested keys, recursively process them.
         for k in self.__nested_keys__:
             # Fetch annotation class type or JSONObject
             t = self._get_annot_cls(annots, k, ignore_builtins=True)[0]
 
-            if isinstance(cleaned_data[k], dict):
-                cleaned_data[k] = t(cleaned_data[k], cast_types=cast_types, ordered=ordered)
-            elif isinstance(cleaned_data[k], list):
+            if isinstance(self.__data_dict__[k], dict):
+                self.__data_dict__[k] = t(self.__data_dict__[k], cast_types=cast_types, ordered=ordered)
+            elif isinstance(self.__data_dict__[k], list):
                 _tmp = list()
-                for i in cleaned_data[k]:
+                for i in self.__data_dict__[k]:
                     if isinstance(i, dict):
                         _tmp.append(t(i, cast_types=cast_types, ordered=ordered))
                     elif isinstance(i, str):
@@ -209,18 +205,22 @@ class JSONObject:
                             _tmp.append(i)
                     else:
                         _tmp.append(i)
-                cleaned_data[k] = _tmp
+                self.__data_dict__[k] = _tmp
 
-        # Update class properties and save the data
-        for k, v in cleaned_data.items():
+        # Save data to the object properties
+        for k, v in self.__data_dict__.items():
             self.__dict__[k] = v
-        self.__data_dict__ = cleaned_data
-        __initialized__ = True
 
     def __setattr__(self, key, value):
         super().__setattr__(key, value)
-        if not self.__initialized__ or key.startswith('__'):
+        # Regex search is slightly faster than 'key.startswith()'.
+        if _REGEX_HIDDEN_PROP.search(key):
             return
+        # If we are here and self.__data_dict__ is None, we should initialize it and store the value. This
+        # probably means the __init__() method has been overridden and we are still waiting for our __init__()
+        # method to be called.
+        if not self.__data_dict__:
+            self.__data_dict__ = self.__dict_cls__()
         self.__data_dict__[key] = value
 
     @staticmethod
