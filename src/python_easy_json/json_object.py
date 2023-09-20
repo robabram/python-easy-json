@@ -22,6 +22,7 @@ class JSONObject:
     """
     Simple object to recursively convert a dict or json string to object properties
     """
+    __initialized__ = False
     @staticmethod
     def _get_annot_cls(annots: dict, key: str, ignore_builtins = False) -> typing.List:
         """
@@ -165,6 +166,7 @@ class JSONObject:
                 for k, v in cleaned_data.items():
                     self.__dict__[k] = v
                 self.__data_dict__ = cleaned_data
+            self.__initialized__ = True
             return
 
         if annots:
@@ -213,6 +215,13 @@ class JSONObject:
         for k, v in cleaned_data.items():
             self.__dict__[k] = v
         self.__data_dict__ = cleaned_data
+        __initialized__ = True
+
+    def __setattr__(self, key, value):
+        super().__setattr__(key, value)
+        if not self.__initialized__ or key.startswith('__'):
+            return
+        self.__data_dict__[key] = value
 
     @staticmethod
     def _json_serial(obj):
