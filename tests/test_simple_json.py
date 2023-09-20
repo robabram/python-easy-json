@@ -55,3 +55,57 @@ class TestSimpleDict(BaseTestCase):
         self.assertEqual(obj.field_list[1], 'null')
         self.assertIsNone(obj.field_list[2])
 
+    def test_property_set_after_init(self):
+        """ Test additional property setting is recorded after the object is initialized """
+        obj = JSONObject({'prop_abc': None})
+
+        self.assertIsInstance(obj, JSONObject)
+
+        self.assertIsNone(obj.prop_abc)
+        data = obj.to_dict()
+        self.assertIsNone(data['prop_abc'])
+
+        obj.prop_abc = '123'
+
+        self.assertEqual(obj.prop_abc, '123')
+        data = obj.to_dict()
+        self.assertEqual(data['prop_abc'], '123')
+
+    def test_setting_object_after_init(self):
+        """ Test setting a nested object after init """
+
+        obj = JSONObject({'prop_obj': None})
+
+        nested_obj = JSONObject({'nested_prop': 123})
+
+        self.assertIsInstance(obj, JSONObject)
+        self.assertIsInstance(nested_obj, JSONObject)
+
+        obj.prop_obj = nested_obj
+
+        data = obj.to_dict()
+        self.assertIsInstance(data['prop_obj'], dict)
+        self.assertEqual(data['prop_obj']['nested_prop'], 123)
+
+    def test_property_with_single_hyphen(self):
+
+        obj = JSONObject({'_test_prop': 123})
+
+        self.assertIsInstance(obj, JSONObject)
+        self.assertEqual(obj._test_prop, 123)
+
+        data = obj.to_dict()
+        self.assertEqual(data['_test_prop'], 123)
+
+    def test_setattr_after_init(self):
+        """ Test that calling setattr() works correctly after init """
+
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        setattr(obj, 'new_prop', 'abc')
+        self.assertEqual(obj.new_prop, 'abc')
+
+        data = obj.to_dict()
+        self.assertEqual(data['new_prop'], 'abc')
+        self.assertEqual(data['test_prop'], 123)
