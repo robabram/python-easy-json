@@ -56,6 +56,10 @@ class PythonTypingUnionModel(JSONObject):
     settings: Optional[JSONObject] = None
 
 
+class UnCastableTypingUnionModel(JSONObject):
+    data: Union[bytes, int] = None
+
+
 class TestObjectModel(BaseTestCase):
     """ Test using JSONObject for data models """
 
@@ -272,3 +276,16 @@ class TestObjectModel(BaseTestCase):
         self.assertIsNone(obj.field_str)
         self.assertIsNone(obj.field_date)
         self.assertIsNone(obj.field_datetime)
+
+
+    def test_uncastable_annotation_value(self):
+        """ Attempt to cast an un-castable value for a union annotation """
+
+        data = {'data': 'this is a string'}
+
+        obj = UnCastableTypingUnionModel(data, cast_types=True)
+
+        self.assertIsInstance(obj, UnCastableTypingUnionModel)
+
+        self.assertIsInstance(obj.data, str)
+        self.assertEqual('this is a string', obj.data)
