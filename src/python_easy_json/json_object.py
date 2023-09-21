@@ -106,9 +106,8 @@ class JSONObject:
         # Support Unions types which may have multiple types defined.
         annot_types = cls._get_annot_cls(annots, k)
         # Check to see if the value is already in the correct type.
-        for t in annot_types:
-            if type(v) == t:
-                return v
+        if type(v) in annot_types:
+            return v
 
         for t in annot_types:
             if t == datetime.date and not isinstance(v, datetime.date):
@@ -133,8 +132,11 @@ class JSONObject:
                         v = t[str(v)]
                         break
             else:
-                v = t(v)
-                break
+                try:
+                    v = t(v)
+                    break
+                except (TypeError, ValueError):
+                    pass
 
         return v
 
