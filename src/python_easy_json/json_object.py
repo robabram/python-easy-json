@@ -267,3 +267,34 @@ class JSONObject:
 
     def __repr__(self):
         return self.to_json()
+
+    def __len__(self):
+        return len(self.__data_dict__.keys())
+
+    def __add__(self, other):
+        if not isinstance(other, JSONObject):
+            raise TypeError(f"Invalid operand type for +: 'JSONObject' and '{str(other)}'")
+        return self.update(**other.to_dict())
+
+    def update(self, *args, **kwargs) -> "JSONObject":
+        """
+        Update or add additional properties to this object by passing a dictionary or list of key value pairs.
+        """
+        if args:
+            for arg in args:
+                if isinstance(arg, dict):
+                    for k, v in arg.items():
+                        setattr(self, k, v)
+                elif isinstance(arg, (list, tuple)):
+                    for item in arg:
+                        if len(item) != 2:
+                            raise ValueError('Invalid tuple size')
+                        setattr(self, item[0], item[1])
+                else:
+                    raise TypeError(f"TypeError: '{type(arg)}' object is not iterable")
+
+        elif kwargs:
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
+        return self
