@@ -109,3 +109,104 @@ class TestSimpleDict(BaseTestCase):
         data = obj.to_dict()
         self.assertEqual(data['new_prop'], 'abc')
         self.assertEqual(data['test_prop'], 123)
+
+    def test_update_with_dict(self):
+        """ Test we can update the JSONObject by passing a dict object """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        obj = obj.update({'test_prop': 456, 'new_prop': 987})
+
+        self.assertEqual(obj.new_prop, 987)
+        self.assertEqual(obj.test_prop, 456)
+
+        data = obj.to_dict()
+
+        self.assertEqual(data['new_prop'], 987)
+        self.assertEqual(data['test_prop'], 456)
+
+    def test_update_with_keyword_args(self):
+        """ Test we can update the JSONObject by passing key word arguments """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        obj = obj.update(test_prop=456, new_prop=987)
+
+        self.assertEqual(obj.new_prop, 987)
+        self.assertEqual(obj.test_prop, 456)
+
+        data = obj.to_dict()
+
+        self.assertEqual(data['new_prop'], 987)
+        self.assertEqual(data['test_prop'], 456)
+
+    def test_update_with_iterable_pairs(self):
+        """ Test we can update the JSONObject by passing iterable pair arguments """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        obj = obj.update([('test_prop', 456), ('new_prop', 987)])
+
+        self.assertEqual(obj.new_prop, 987)
+        self.assertEqual(obj.test_prop, 456)
+
+        data = obj.to_dict()
+
+        self.assertEqual(data['new_prop'], 987)
+        self.assertEqual(data['test_prop'], 456)
+
+    def test_update_exceptions(self):
+        """ Test update using bad data to cause exceptions """
+
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        # Test no args, should not raise an error.
+        self.assertIsInstance(obj.update({}), JSONObject)
+
+        # Test non-iterable value raises TypeError
+        self.assertRaises(TypeError, obj.update, None)
+        self.assertRaises(TypeError, obj.update, 123)
+
+        # Test bad iterable pair raise ValueError
+        self.assertRaises(ValueError, obj.update, [('test_prop', 456, 333)])
+
+    def test_number_of_properties(self):
+        """ Test the number of properties by calling len() function """
+
+        obj = JSONObject({'test_prop': 123, 'another_prop': 'abc'})
+        self.assertIsInstance(obj, JSONObject)
+
+        self.assertEqual(len(obj), 2)
+
+    def test_add_object(self):
+        """ Test add object """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        other_obj = JSONObject({'another_prop': 'abc'})
+        self.assertIsInstance(other_obj, JSONObject)
+
+        island_other_obj = JSONObject({'island_prop': 'sandy'})
+        self.assertIsInstance(island_other_obj, JSONObject)
+
+        obj += other_obj
+
+        self.assertEqual(obj.test_prop, 123)
+        self.assertEqual(obj.another_prop, 'abc')
+
+        obj = obj + island_other_obj
+
+        self.assertEqual(obj.island_prop, 'sandy')
+
+    def test_add_invalid_operand(self):
+        """ Test adding an invalid operand """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        try:
+            obj += {'other_prop': 'abc'}
+        except TypeError:
+            pass
+
+        self.assertFalse(hasattr(obj, 'other_prop'))

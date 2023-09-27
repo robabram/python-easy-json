@@ -165,7 +165,15 @@ Documentation
         :param dates_to_str: Boolean, convert all date or datetime values to string.
         :returns: dictionary object
 
-    
+    JSONObject.update([Dict|List|Tuple]) accepts either a dictionary object or an iterable of key/value
+        pairs (as tuples or other iterables of length two). If keyword arguments are specified, the dictionary
+        is then updated with those key/value pairs: obj.update(sky=1, cloud=2).
+
+    Plus Operator: Two JSONObjects may be merged using the plus (+) operator: obj = obj + other_obj.
+
+    Number of Properties: The number of managed properties may be determined by using the Python 'len()'
+        function: len(obj) == 5.
+
 Project Links
 =============
 
