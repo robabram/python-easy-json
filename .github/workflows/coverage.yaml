@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install coverage
+          pip install coverage setuptools
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run Coverage
         run: |
@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p coverage
       - name: Coverage Badge
-        uses: tj-actions/coverage-badge-py@v1.8
+        uses: tj-actions/coverage-badge-py@v2
         with:
           output: coverage/coverage.svg
       - name: Publish coverage report to coverage-badge branch

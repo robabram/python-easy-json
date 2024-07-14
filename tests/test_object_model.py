@@ -289,3 +289,15 @@ class TestObjectModel(BaseTestCase):
 
         self.assertIsInstance(obj.data, str)
         self.assertEqual('this is a string', obj.data)
+
+
+    def test_cast_failure(self):
+        """ Test cast value exception raises custom TypeError exception """
+        simple_data = json.loads(self.json_data.simple)
+        # Change string value in data to a nested dictionary
+        simple_data['field_str'] = {'data': 'this is a nested dict'}
+        with self.assertRaises(TypeError) as context:
+            obj = SimpleModel(simple_data)
+            self.assertIsNone(obj)
+
+        self.assertTrue('error casting to type' in str(context.exception))

@@ -190,7 +190,10 @@ class JSONObject:
             t = self._get_annot_cls(annots, k, ignore_builtins=True)[0]
 
             if isinstance(self.__data_dict__[k], dict):
-                self.__data_dict__[k] = t(self.__data_dict__[k], cast_types=cast_types, ordered=ordered)
+                try:
+                    self.__data_dict__[k] = t(self.__data_dict__[k], cast_types=cast_types, ordered=ordered)
+                except TypeError:
+                    raise TypeError(f"TypeError: error casting to type '{str(t)}' for property '{k}'")
             elif isinstance(self.__data_dict__[k], list):
                 _tmp = list()
                 for i in self.__data_dict__[k]:
