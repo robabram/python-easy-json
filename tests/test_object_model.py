@@ -20,6 +20,16 @@ class SimpleModel(JSONObject):
     field_datetime: datetime = None
 
 
+# Support PEP-585, allow standard collection types to be used as type annotations when Python >= 3.9.
+class PEP585Model(JSONObject):
+    field_list: list = None
+    field_tuple: tuple = None
+    field_set: set = None
+    field_dict: dict = None
+    field_type: type = None
+    field_frozenset: frozenset = None
+
+
 # Represent test_data/nested_data_1.json as data models
 class CakeToppingTypeModel(JSONObject):
     id: int = None
@@ -301,3 +311,18 @@ class TestObjectModel(BaseTestCase):
             self.assertIsNone(obj)
 
         self.assertTrue('error casting to type' in str(context.exception))
+
+
+    def test_pep585_collection_types(self):
+        """ Test PEP-585 collection types can be used as annotation types """
+        data = {
+            'field_list': [1, 2, 3, 4],
+            'field_tuple': (1, 2, 3, 4),
+            'field_set': {1, 2, 3, 4},
+            'field_dict': {'abc': 123, 'xyz': 456},
+            'field_type': type('this is a str'),
+            'field_frozenset': frozenset({'abc': 123, 'xyz': 456})
+        }
+        obj = PEP585Model(data)
+
+        self.assertIsInstance(obj.field_list, list)
