@@ -193,7 +193,7 @@ class JSONObject:
                 try:
                     self.__data_dict__[k] = t(self.__data_dict__[k], cast_types=cast_types, ordered=ordered)
                 except TypeError:
-                    raise TypeError(f"Error: Bad type annotation, cast type failed for property ({k})")
+                    raise TypeError(f"TypeError: error casting to type '{str(t)}' for property '{k}'")
             elif isinstance(self.__data_dict__[k], list):
                 _tmp = list()
                 for i in self.__data_dict__[k]:
