@@ -326,3 +326,8 @@ class TestObjectModel(BaseTestCase):
         obj = PEP585Model(data)
 
         self.assertIsInstance(obj.field_list, list)
+        self.assertIsInstance(obj.field_tuple, tuple)
+        self.assertIsInstance(obj.field_dict, dict)
+        self.assertIsInstance(obj.field_set, set)
+        self.assertIsInstance(obj.field_type, type)
+        self.assertIsInstance(obj.field_frozenset, frozenset)
