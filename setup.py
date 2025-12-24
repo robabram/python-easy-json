@@ -6,7 +6,7 @@ import os
 
 from setuptools import setup, find_packages
 
-__VERSION__ = "1.2.0"
+__VERSION__ = "1.2.2"
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -49,19 +49,20 @@ setup(
         "models",
         "data"
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
     test_suite="tests",
     project_urls={

@@ -2,7 +2,7 @@
 # This file is subject to the terms and conditions defined in the
 # file 'LICENSE', which is part of this source code package.
 #
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum, IntEnum
 
 from tests.base_test import BaseTestCase
@@ -45,7 +45,7 @@ class TestJSONWithEnum(BaseTestCase):
 
     def test_object_with_enum_values(self):
         """ Test JSONObject class with IntEnum property. """
-        ts = datetime.utcnow()
+        ts = datetime.now(timezone.utc)
 
         data = {
             'timestamp': ts.isoformat(),
@@ -69,7 +69,7 @@ class TestJSONWithEnum(BaseTestCase):
 
     def test_str_enum(self):
         """ Test an enum with string values """
-        ts = datetime.utcnow()
+        ts = datetime.now(timezone.utc)
 
         data = {
             'timestamp': ts.isoformat(),

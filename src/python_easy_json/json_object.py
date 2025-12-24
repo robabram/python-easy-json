@@ -13,6 +13,10 @@ from collections import OrderedDict
 from dateutil import parser as dt_parser
 from json import JSONDecodeError
 
+# 3.14 introduced lazy annotation loading, we must use the 'annotationlib' to inspect annotations.
+if not (sys.version_info.major == 3 and sys.version_info.minor < 14):
+    from annotationlib import get_annotations, Format as annot_format
+
 _enum_t = type(enum.Enum)
 
 # Support OrderedDict for Python versions 3.6 or below.
@@ -45,8 +49,8 @@ class JSONObject:
                 cls_ = cls_.__args__[0]
             # Check if typing annotation class is a Union type.
             # Try to find the right object class in the Union types list, ignore 'builtin' types.
-            if '__args__' in cls_.__dict__ and isinstance(cls_.__dict__['__args__'], (list, tuple)):
-                for cls_item in cls_.__dict__['__args__']:
+            if hasattr(cls_, '__args__') and isinstance(cls_.__args__, (list, tuple)):
+                for cls_item in cls_.__args__:
                     # Try to find the right object class in the Union types list, ignore 'builtin' types.
                     if issubclass(type(cls_item), object) and not isinstance(cls_item, typing.TypeVar):
                         if ignore_builtins and cls_item.__module__ == 'builtins':
@@ -75,10 +79,12 @@ class JSONObject:
                     continue
                 result = self._collect_annotations(base)
                 annots.update(result)
-
-        if hasattr(cls_, '__annotations__'):
-            annots.update(cls_.__annotations__)
-
+        # 3.14 introduced breaking changes to annotation inspection due to lazy annotation loading.
+        if sys.version_info.major == 3 and sys.version_info.minor < 14:
+            if hasattr(cls_, '__annotations__'):
+                annots.update(cls_.__annotations__)
+        else:
+            annots.update(get_annotations(cls_, format=annot_format.VALUE))
         return annots
 
     @staticmethod
