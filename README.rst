@@ -70,6 +70,11 @@ Data from a JSON String
 
     {"test_key": "test_value"}
 
+    data = dict(obj)
+    print(data)
+
+    {"test_key": "test_value"}
+
 Data from a python dictionary
 
 ::
