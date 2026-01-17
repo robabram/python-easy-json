@@ -307,3 +307,10 @@ class JSONObject:
                 setattr(self, k, v)
 
         return self
+
+    def __iter__(self):
+        """ Allow casting to Dict, IE: dict({JSONObject instance}) """
+        data = self.to_dict(dates_to_str=True)
+        if data:
+            for k, v in data.items():
+                yield k, v

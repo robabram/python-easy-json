@@ -210,3 +210,12 @@ class TestSimpleDict(BaseTestCase):
             pass
 
         self.assertFalse(hasattr(obj, 'other_prop'))
+
+    def test_cast_to_dict(self):
+        """ Test cast a JSONObject to a dict """
+        obj = JSONObject({'test_prop': 123})
+        self.assertIsInstance(obj, JSONObject)
+
+        dict1 = dict(obj)
+        dict2 = obj.to_dict(dates_to_str=True)
+        self.assertEqual(dict1, dict2)
