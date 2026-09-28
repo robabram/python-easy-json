@@ -56,7 +56,7 @@ class JSONObject:
                         if ignore_builtins and cls_item.__module__ == 'builtins':
                             continue
                         cls_types.append(cls_item)
-            elif cls_.__module__ == 'typing':
+            elif isinstance(cls_, str) or cls_.__module__ == 'typing':
                 pass
             else:
                 cls_types.append(cls_)
