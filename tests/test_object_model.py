@@ -70,6 +70,12 @@ class UnCastableTypingUnionModel(JSONObject):
     data: Union[bytes, int] = None
 
 
+class StringAnnotationModel(JSONObject):
+    """ Test an annotation that has been placed in quotes, quoted annotations cannot be cast to """
+    id: str = None
+    destination: "SomeClassType" = None
+
+
 class TestObjectModel(BaseTestCase):
     """ Test using JSONObject for data models """
 
@@ -331,3 +337,10 @@ class TestObjectModel(BaseTestCase):
         self.assertIsInstance(obj.field_set, set)
         self.assertIsInstance(obj.field_type, type)
         self.assertIsInstance(obj.field_frozenset, frozenset)
+
+    def test_string_annotation(self):
+        """ Test a string annotation """
+        data = {'id': 'abc', 'destination': {'name': 'xyz', 'city': 'testtown'}}
+        obj = StringAnnotationModel(data)
+        self.assertIsInstance(obj, StringAnnotationModel)
+        self.assertIsInstance(obj.destination, JSONObject)
